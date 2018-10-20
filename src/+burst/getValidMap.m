@@ -1,12 +1,12 @@
 function [validMap,twMap] = getValidMap(twMap,fiux,pixBad,isInit)
 % GetValidMap Initial time windows and correlation for each new pixel from neighbors
 
-% dh = [0 0 0 1 -1];
-% dw = [0 -1 1 0 0];
-dh = [0 -1 0 1 -1 1 -1 0 1];
-dw = [0 -1 -1 -1 0 0 1 1 1];
+dh = [0 0 0 1 -1];
+dw = [0 -1 1 0 0];
+% dh = [0 -1 0 1 -1 1 -1 0 1];
+% dw = [0 -1 -1 -1 0 0 1 1 1];
 
-% st0 = zeros(3,3); st0(1:3,2)=1; st0(2,1:3)=1;
+st0 = zeros(3,3); st0(1:3,2)=1; st0(2,1:3)=1;
 
 [H,W] = size(fiux);
 validMap = zeros(H,W);
@@ -16,8 +16,8 @@ mapStart = fiux;
 mapStart(pixBad>0) = 0;
 nNew = 0;
 for kk=1:diStep
-    %validMapNew = imdilate(mapStart,st0);
-    validMapNew = imdilate(mapStart,strel('square',3));
+    validMapNew = imdilate(mapStart,st0);
+%     validMapNew = imdilate(mapStart,strel('square',3));
     if ~isInit
         validMapNew = validMapNew - mapStart;        
     end

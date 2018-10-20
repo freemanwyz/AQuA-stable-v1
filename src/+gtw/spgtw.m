@@ -109,7 +109,7 @@ fprintf('Node %d, SNR %d dB Ratio %.2f\n',numel(spLst),20*log10(snrThr),sum(spSz
 % graph
 [ih0,iw0] = find(validMap>0);
 gapSeed = max(ceil(max(max(ih0)-min(ih0),max(iw0)-min(iw0))/opts.gtwGapSeedRatio),opts.gtwGapSeedMin);
-[ref,tst,refBase,s,t,idxGood] = gtw.sp2graph(dat,validMap,spLst,spSeedVec(1),gapSeed);
+[ref,tst,refBase,s,t,idxGood] = gtw.sp2graph(dat,validMap,spLst,spSeedVec(1),gapSeed,opts.smoCurve);
 
 % gtw
 spLst = spLst(idxGood);

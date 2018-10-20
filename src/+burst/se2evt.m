@@ -57,7 +57,11 @@ cxAll(:,rgt(rgtSel)) = cx;
 cx1 = cxAll(:,rgtx);
 
 % events
-minShow = sqrt(opts.minShow1);
+if opts.usePG>0
+    minShow = sqrt(opts.minShow1);
+else
+    minShow = opts.minShow1;
+end
 [evtL,evtRecon] = gtw.evtRecon(spLst,cx1,evtMap,minShow);
 evtRecon = evtRecon.^2;
 evtRecon = uint8(evtRecon*255);

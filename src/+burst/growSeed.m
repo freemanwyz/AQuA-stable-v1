@@ -121,7 +121,7 @@ function [resCell,lblMap] = growSeed(dat,dF,resCell,lblMap,lmLoc,lm3Idx,opts,stg
     end
     
     % fit around seeds
-    parfor uu=1:nLm
+    for uu=1:nLm
         res = resCell{uu};
         if isempty(res) || res.cont==0
             continue

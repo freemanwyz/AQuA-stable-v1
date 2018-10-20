@@ -66,6 +66,11 @@ function [riseLst,datR,evtLst,seLst] = evtTop(dat,dF,svLst,riseX,opts,ff)
         [evtRecon,evtL,evtMap,dlyMap,nEvt0,rgtx,rgtSel] = burst.se2evt(...
             dF0,seMap0,nn,ihw0,rgh,rgw,rgt,it0,T,opts,1);
         
+        if max(evtL(:))>1
+            %keyboard
+            fprintf('%d events detected\n',max(evtL(:)));
+        end
+        
         seMap00 = seMap(rgh,rgw,rgtx);
         evtL(seMap00~=nn) = 0;  % avoid interfering other events
         evtL(evtL>0) = evtL(evtL>0)+nEvt;

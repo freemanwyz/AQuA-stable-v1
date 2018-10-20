@@ -13,12 +13,12 @@ function [dat,dF,arLst,lmLoc,opts,dActVox] = actTop(datOrg,opts,evtSpatialMask,f
     end
     noiseEstMask = evtSpatialMask.*(datOrgMean>opts.fgFluo);
     
-    % noise for raw data
-    xx = (datOrg(:,:,2:end)-datOrg(:,:,1:end-1)).^2;
-    stdMap = sqrt(median(xx,3)/0.9133);
-    stdMapGauBef = double(imgaussfilt(stdMap));
-    stdMapGauBef(noiseEstMask==0) = nan;
-    stdEstBef = double(nanmedian(stdMapGauBef(:)));
+    % % noise for raw data
+    % xx = (datOrg(:,:,2:end)-datOrg(:,:,1:end-1)).^2;
+    % stdMap = sqrt(median(xx,3)/0.9133);
+    % stdMapGauBef = double(imgaussfilt(stdMap));
+    % stdMapGauBef(noiseEstMask==0) = nan;
+    % stdEstBef = double(nanmedian(stdMapGauBef(:)));
     
     % smooth the data
     dat = datOrg;
@@ -45,8 +45,9 @@ function [dat,dF,arLst,lmLoc,opts,dActVox] = actTop(datOrg,opts,evtSpatialMask,f
     
     % noise and threshold, get active voxels
     if isfield(opts,'legacyModeActRun') && opts.legacyModeActRun>0
-        opts.varEst = stdEstBef.^2;
-        opts.varMap = stdMapGauBef.^2;
+        opts.varEst = stdEst.^2;
+        % opts.varEst = stdEstBef.^2;
+        %opts.varMap = stdMapGauBef.^2;
         [arLst,dActVox] = burst.getAr(dF,opts,evtSpatialMask);
     else
         opts.varEst = stdEst.^2;

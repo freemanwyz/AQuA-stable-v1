@@ -18,7 +18,7 @@ function [svLst,dReconSp,riseX] = spTop(dat,dF,lmLoc,evtSpatialMask,opts,ff)
     lmAll = zeros(H,W,T,'logical');
     lmAll(lmLoc) = true;
     [resCell,lblMap] = burst.growSeed(dat,dF,resCell,lblMap,lmLoc,lmAll,opts1,0);
-    for pp=1:40
+    for pp=1:60
         fprintf('Grow %d\n',pp);
         if exist('ff','var')
             waitbar(0.1+pp/80,ff);
@@ -56,8 +56,8 @@ function [svLst,dReconSp,riseX] = spTop(dat,dF,lmLoc,evtSpatialMask,opts,ff)
         waitbar(1,ff);
     end
     
-    poolobj = gcp('nocreate');
-    delete(poolobj);
+    %poolobj = gcp('nocreate');
+    %delete(poolobj);
     
     svLst = label2idx(lblMap);
     

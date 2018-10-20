@@ -1,4 +1,4 @@
-function [ref,tst,refBase,s,t,idxGood] = sp2graph(df0ip,vMap0,spLst,seedIn,gapSeedHW)
+function [ref,tst,refBase,s,t,idxGood] = sp2graph(df0ip,vMap0,spLst,seedIn,gapSeedHW,smoCurve)
 % sp2graph convert super pixels to curves and graph nodes for GTW
 % Input super pixels are not perfect:
 % Empty or too small
@@ -8,7 +8,7 @@ function [ref,tst,refBase,s,t,idxGood] = sp2graph(df0ip,vMap0,spLst,seedIn,gapSe
 
 % test and refererence curves
 % optionally, ignore signals after arriving peak
-df0ipSmo = imgaussfilt3(df0ip,[1 1 1]);
+df0ipSmo = imgaussfilt3(df0ip,[1 1 smoCurve]);
 
 [ih,iw] = ind2sub([H0,W0],seedIn);
 rgh = max(ih-gapSeedHW,1):min(ih+gapSeedHW,H0);
@@ -17,7 +17,7 @@ df00Vec = reshape(df0ip(rgh,rgw,:),[],T0);
 vm00 = vMap0(rgh,rgw);
 df00Vec = df00Vec(vm00>0,:);
 refBase = nanmean(df00Vec,1);
-refBase = imgaussfilt(refBase,1);
+refBase = imgaussfilt(refBase,smoCurve);
 refBase = refBase - nanmin(refBase);
 
 r1 = refBase;
@@ -44,7 +44,7 @@ for ii=1:numel(spLst)
     k0 = max(tst0smo)/max(refBase);
     
     tst0 = nanmean(df0Vec(sp0,:),1);
-    tst0g = imgaussfilt(tst0,1);
+    tst0g = imgaussfilt(tst0,smoCurve);
     tst0 = tst0 - min(tst0g);
     
     ref0 = refBase*k0;
