@@ -60,14 +60,24 @@ end
 dFVec = reshape(dFip,[],T);
 mAvg = nanmean(dFVec(validMap>0,:));
 snrInit = ceil(max(mAvg)/(s00/sqrt(spSz)));
+
 snrThr = snrInit;
+if spSz==1
+    snrThr = 0;
+end
+
 tb = nan(10,2);
-for ii=1:5
+for ii=1:1 % 5
 % for ii=1:numel(snrVec)
     %snrThr = snrVec(ii);
-    gaphw = (11-ii)*5+5;
-    [spLst,spSeedVec,spSz,~,spStd] = gtw.mov2spSNR(dF,dFInfo,tMapMT,validMap,snrThr,gaphw);
-    fprintf('Max %d - Tgt %d - Now %d - Thr %f\n',nSpMax,nSpTgt,numel(spLst),snrThr)
+    if 1
+        gaphw = (11-ii)*5+5;
+        [spLst,spSeedVec,spSzLst,~,spStd] = gtw.mov2spSNR(dF,dFInfo,tMapMT,validMap,snrThr,gaphw);
+    else
+        spSeedVec = find(validMap>0);
+        spLst = num2cell(spSeedVec);
+    end
+    %fprintf('Max %d - Tgt %d - Now %d - Thr %f\n',nSpMax,nSpTgt,numel(spLst),snrThr)
     
     tb(ii,1) = snrThr;
     tb(ii,2) = numel(spLst);
@@ -103,7 +113,9 @@ if numel(spLst)<2
     isFail = 1;
     return
 end
-fprintf('Node %d, SNR %d dB Ratio %.2f\n',numel(spLst),20*log10(snrThr),sum(spSz)/nPixTot)
+% fprintf('Node %d, SNR %d dB Ratio %.2f\n',numel(spLst),20*log10(snrThr),sum(spSzLst)/nPixTot)
+fprintf('Node %d, frame %d\n',numel(spLst),size(dat,3))
+
 
 %% alignment
 % graph
@@ -111,20 +123,45 @@ fprintf('Node %d, SNR %d dB Ratio %.2f\n',numel(spLst),20*log10(snrThr),sum(spSz
 gapSeed = max(ceil(max(max(ih0)-min(ih0),max(iw0)-min(iw0))/opts.gtwGapSeedRatio),opts.gtwGapSeedMin);
 [ref,tst,refBase,s,t,idxGood] = gtw.sp2graph(dat,validMap,spLst,spSeedVec(1),gapSeed,opts.smoCurve);
 
+% if numel(spLst)>1000 && numel(refBase)>5
+if 0
+    %keyboard
+    seedIdxMap = zeros(size(validMap));
+    seedLst = cell2mat(spLst');
+    seedIdxMap(seedLst) = 1:numel(seedLst);    
+    save(['tmp/gtw_',num2str(seSel),'.mat'],'ref','tst','s','t','seedIdxMap');
+    cx = []; dlyMap = []; distMat = []; evtMemC = []; evtMemCMap = [];
+    rgt00 = 1:T; isFail = 1;
+    return
+end
+
+if isfield(opts,'reSampleCurve') && opts.reSampleCurve>0
+    refBase = interp(refBase,2);
+    ref1 = zeros(size(ref,1),size(ref,2)*2);
+    tst1 = ref1;
+    for ii=1:size(ref,1)
+        ref1(ii,:) = interp(ref(ii,:),2);
+        tst1(ii,:) = interp(tst(ii,:),2);
+    end
+    ref = ref1;
+    tst = tst1;
+end
+
 % gtw
 spLst = spLst(idxGood);
 spSeedVec = spSeedVec(idxGood);
 s2 = spStd(idxGood).^2;
 s2(s2==0) = median(s2);
-if numel(spLst)>3 && numel(refBase)>5
+spNumxx = 3; % 3
+if numel(spLst)>spNumxx && numel(refBase)>5
     tic
     [ ss,ee,gInfo ] = gtw.buildGTWGraph( ref, tst, s, t, smoBase, maxStp, s2);
     [~, labels1] = aoIBFS.graphCutMex(ss,ee);
     path0 = gtw.label2path4Aosokin( labels1, ee, ss, gInfo );
     t00 = toc;
-    if numel(spLst)>1000
-        fprintf('Time %fs\n',t00);
-    end
+    %if numel(spLst)>100
+    fprintf('Time %fs\n',t00);
+    %end
 else
     [nPix,nTps] = size(tst);
     path0 = cell(nPix,1);
@@ -146,6 +183,13 @@ end
 datWarp = gtw.warpRef2Tst(pathCell,refBase/max(refBase(:)),vMap1,[H,W,numel(refBase)]);
 dVec = reshape(datWarp,[],numel(refBase));
 cx = dVec(spSeedVec,:);
+
+if isfield(opts,'reSampleCurve') && opts.reSampleCurve>0
+    datWarp1 = datWarp(:,:,1:2:end);
+    cx = cx(:,1:2:end);
+end
+
+% zzshow(dat);zzshow(datWarp);
 
 % time to achieve different levels for each seed
 nSp = numel(spLst);

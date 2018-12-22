@@ -6,7 +6,7 @@ maxStp = opts.maxStp; % 11
 maxRiseUnc = opts.cRise;  % 1
 cDelay = opts.cDelay;  % 5
 
-spSz = 25;  % preferred super pixel size
+spSz = opts.spSz;  % preferred super pixel size, 25
 spT = 30;  % super pixel number scale (larger for more)
 
 % GTW on super pixels
@@ -67,5 +67,43 @@ evtRecon = evtRecon.^2;
 evtRecon = uint8(evtRecon*255);
 nEvt0 = max(evtL(:));
 
+% debug
+% global evtGt 
+% global datSim0
+if 0
+    gt0 = evtGt(rgh,rgw,rgtx);
+    idx0 = mode(gt0(evtL>0));
+    gt0(gt0>0 & gt0~=idx0) = 0;
+    int0 = sum(evtL(:)>0 & gt0(:)>0);
+    uni0 = sum(evtL(:)>0 | gt0(:)>0);
+    iou0 = int0/uni0;
+    fprintf('iou: %d\n',iou0)
+    
+    if iou0<0
+        dat = datSim0(rgh,rgw,rgtx);
+        save(['./tmp/',num2str(iou0),' ',num2str(seSel),'.mat'], '-regexp', '^(?!(evtGt|datSim0)$).')
+    end
+    
+    if 0  
+        xfn = evtL==0 & gt0>0;
+        xfp = evtL>0 & gt0==0;
+        [H2,W2,T2] = size(evtL);
+        xOut = zeros(H2,W2,3,T2);
+        xOut(:,:,1,:) = dat+xfn;
+        xOut(:,:,2,:) = dat;
+        xOut(:,:,3,:) = dat+xfp;
+        zzshow(xOut)
+        keyboard
+        close all
+    end
 end
+
+end
+
+
+
+
+
+
+
 
